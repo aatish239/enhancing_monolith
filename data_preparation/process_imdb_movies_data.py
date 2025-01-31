@@ -13,6 +13,7 @@ inter1 = pd.merge(ratings, crew, on='tconst', how='left')
 movies_df = pd.merge(inter1, title_basics, on='tconst', how='left')
 
 # export the datasets to the csv files
+ratings.to_csv('../raw_datasets/movie_ratings.csv') # will be used for web scraping
 movies_df.to_csv('../datasets/movies.csv')
 basics.to_csv('../datasets/movie_people.csv')
 
