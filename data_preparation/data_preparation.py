@@ -69,7 +69,7 @@ movies_data['genre1'] = movies_data['genre1'].map(label_to_value)
 movies_data['genre2'] = movies_data['genre2'].map(label_to_value)
 movies_data['genre3'] = movies_data['genre3'].map(label_to_value)
 
-movies_data.to_csv('../processed_data/movies.csv')
-users_data.to_csv('../processed_data/users_data.csv')
+movies_data.to_csv('../processed_data/movies.csv', index=False)
+users_data.to_csv('../processed_data/users_data.csv', index=False)
 
 

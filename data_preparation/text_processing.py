@@ -14,9 +14,11 @@ nltk.download('omw-1.4')
 nltk.data.path.append('../nltk_data')
 
 
-users_data = pd.read_csv('../processed_data/users_data.csv')
-movies_data = pd.read_csv('../processed_data/movies.csv')
+users_data = pd.read_csv('../processed_data/users_data.csv', index_col=0)
+movies_data = pd.read_csv('../processed_data/movies.csv', index_col=0)
 
+print(users_data.head())
+print(movies_data.head())
 lemmatizer = WordNetLemmatizer()
 stop_words = set(stopwords.words('english'))
 def preprocess_reviews(reviews):
@@ -29,4 +31,4 @@ def preprocess_reviews(reviews):
     return lemmatized_reviews
 
 users_data['user_reviews'] = users_data['user_reviews'].apply(preprocess_reviews)
-users_data.to_csv('../processed_data/users_data.csv')
+users_data.to_csv('../processed_data/users_data.csv', index=False)
