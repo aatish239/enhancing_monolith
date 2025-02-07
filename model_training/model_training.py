@@ -30,10 +30,18 @@ def get_bert_embeddings(reviews):
 # Iterating over rows
 train_data_with_embeddings = pd.DataFrame(columns=train_data.columns)
 train_data_with_embeddings.to_csv('../processed_data/training_users_data.csv', header=True)
+batch_data = []
+batch_size = 10
 for index, row in train_data.iterrows():
     user_reviews = row['user_reviews']
     embedding = get_bert_embeddings(user_reviews)
-    row['user_reviews'] = embedding
-    row_df = pd.DataFrame([row])
-    print(f"Index: {index}, row {row}")
-    row_df.to_csv('../processed_data/training_users_data.csv', mode='a', header=False)
+    row_copy = row.copy()
+    row_copy['user_reviews'] = embedding
+    print(f"Index: {index}, row {row_copy}")
+    batch_data.append(row_copy)
+    if (index + 1) % batch_size == 0:
+        batch_df = pd.DataFrame(batch_data)
+        batch_df.to_csv('../processed_data/training_users_data.csv', mode='a', header=False)
+        batch_data = []  # Clear memory
+   
+    
