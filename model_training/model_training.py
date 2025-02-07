@@ -25,17 +25,15 @@ def get_bert_embeddings(reviews):
         return cls_embeddings.squeeze(0)  # Shape: [768]
 
 
-train_data['bert_embeddings'] = train_data['user_reviews'].apply(get_bert_embeddings)
+# train_data['bert_embeddings'] = train_data['user_reviews'].apply(get_bert_embeddings)
 
 # Iterating over rows
-print(train_data.columns)
 train_data_with_embeddings = pd.DataFrame(columns=train_data.columns)
-train_data_with_embeddings.to_csv('../processed_data/training_user_data.csv', header=True)
-train_data_with_embeddings = pd.read_csv('../processed_data/training_user_data.csv', index_col=0)
+train_data_with_embeddings.to_csv('../processed_data/training_users_data.csv', header=True)
 for index, row in train_data.iterrows():
     user_reviews = row['user_reviews']
     embedding = get_bert_embeddings(user_reviews)
     row['user_reviews'] = embedding
-    train_data_with_embeddings.loc[index] = row
+    row_df = pd.DataFrame([row])
     print(f"Index: {index}, row {row}")
-    train_data_with_embeddings.to_csv('../processed_data/training_user_data.csv',mode='a', header=False, index=False)
+    row_df.to_csv('../processed_data/training_users_data.csv', mode='a', header=False)
