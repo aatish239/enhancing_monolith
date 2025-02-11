@@ -9,9 +9,10 @@ from tensorflow.keras.layers import Dense, Dropout
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.metrics import mean_squared_error, precision_score, recall_score, accuracy_score,r2_score
+import os
 
 # Load the datasets
-movies_df = pd.read_csv('../processed_data/datasets/movies.csv')
+movies_df = pd.read_csv('../processed_data/movies.csv')
 users_df = pd.read_csv('../processed_data/users_data_bert_embeddings.csv')
 
 # movies_df = pd.read_csv('movies_sample_train (2).csv')
@@ -75,7 +76,6 @@ users_exploded = users_df.explode(['movie_ids', 'user_ratings', 'user_reviews'])
 # Merge with the movies dataset on movie_ids (tconst in movies_df)
 merged_df = pd.merge(users_exploded, movies_df, left_on='movie_ids', right_on='tconst', how='inner')
 
-
 # Function to pad tensors to length 768
 def pad_tensor(tensor, target_length=768):
     if len(tensor) < target_length:
@@ -102,7 +102,7 @@ directors_encoded = mlb_directors.fit_transform(merged_df['directors_list'])
 writers_encoded = mlb_writers.fit_transform(merged_df['writers_list'])
 # Apply padding
 merged_df['user_reviews_padded'] = merged_df['user_reviews'].apply(pad_tensor)
-merged_df.to_csv('../processed_data/merged_data_for_training.csv')
+merged_df.to_csv('../processed_data/merged_dataset.csv')
 
 # Concatenate all features
 X = np.concatenate([
@@ -135,8 +135,19 @@ model = Sequential([
 model.compile(optimizer='adam', loss='mse', metrics=['mae'])
 
 history = model.fit(X_train, y_train, epochs=100, batch_size=4, validation_data=(X_test, y_test))
+# Save the original model
+os.makedirs('model_directory', exist_ok=True)
+model.save('model_directory/original_model.keras')
 
-# Evaluate
+# Convert to a lightweight TensorFlow Lite model
+converter = tf.lite.TFLiteConverter.from_keras_model(model)
+tflite_model = converter.convert()
+
+# Save the lightweight model
+with open('model_directory/lightweight_model.tflite', 'wb') as f:
+    f.write(tflite_model)
+
+
 # Evaluate
 loss, mae = model.evaluate(X_test, y_test)
 y_pred = model.predict(X_test)
@@ -242,4 +253,45 @@ def evaluate_recommendations_for_test_user():
     print(f"Actual Rating: {test_user_actual_rating}")
     for movie, predicted_rating in recommendations:
         print(f"Recommended Movie: {movie}, Predicted Rating: {predicted_rating}")
+
 evaluate_recommendations_for_test_user()
+
+
+def evaluate_lightweight_models():
+    # Load the lightweight model for evaluation
+    interpreter = tf.lite.Interpreter(model_path='model_directory/lightweight_model.tflite')
+    interpreter.allocate_tensors()
+
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+
+    # Function to predict using the lightweight model
+    def predict_with_tflite(input_data):
+        interpreter.set_tensor(input_details[0]['index'], input_data.astype(np.float32))
+        interpreter.invoke()
+        return interpreter.get_tensor(output_details[0]['index'])
+
+    # Evaluate both models
+    def evaluate_model(y_true, y_pred, model_name="Model"):
+        rmse = np.sqrt(mean_squared_error(y_true, y_pred))
+        mae = np.mean(np.abs(y_true - y_pred))
+        loss = mean_squared_error(y_true, y_pred)
+        # accuracy = accuracy_score(y_true.round(), y_pred.round())
+        # precision = precision_score(y_true.round(), y_pred.round(), average='weighted', zero_division=0)
+        # recall = recall_score(y_true.round(), y_pred.round(), average='weighted', zero_division=0)
+        # r2 = r2_score(y_true, y_pred)
+
+        print(f"{model_name} Evaluation:\nRMSE: {rmse}, MAE: {mae}, Loss: {loss}\n")
+
+    # Original Model Evaluation
+    y_pred_original = model.predict(X_test)
+    evaluate_model(y_test, y_pred_original, model_name="Original Model")
+
+    # Lightweight Model Evaluation
+    y_pred_tflite = np.array([predict_with_tflite(x.reshape(1, -1))[0][0] for x in X_test])
+    evaluate_model(y_test, y_pred_tflite, model_name="Lightweight Model")
+    print("lightweight" , os.stat('model_directory/lightweight_model.tflite').st_size)
+    print("Original" , os.stat('model_directory/original_model.keras').st_size)
+    
+evaluate_lightweight_models()
+    

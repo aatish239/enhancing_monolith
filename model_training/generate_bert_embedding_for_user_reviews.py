@@ -5,27 +5,27 @@ from transformers import BertTokenizer, BertModel
 import torch
 import ast
 
-users_data = pd.read_csv('../processed_data/users_data.csv', index_col=0)
-print(users_data.head())
-train_data, temp_data = train_test_split(users_data, test_size=0.3, random_state=42)
-val_data, test_data = train_test_split(temp_data, test_size=0.5, random_state=42)
+users_data = pd.read_csv('../processed_data/users_data_without_bert.csv.csv', index_col=0)
+# print(users_data.head())
+# train_data, temp_data = train_test_split(users_data, test_size=0.3, random_state=42)
+# val_data, test_data = train_test_split(temp_data, test_size=0.5, random_state=42)
 
 # select only those movies which are part of the user dataset.
 
-users_data['movie_ids'] = users_data['movie_ids'].apply(ast.literal_eval)
+# users_data['movie_ids'] = users_data['movie_ids'].apply(ast.literal_eval)
 
-# Flatten the list of movie IDs
-all_movie_ids = [movie_id for sublist in users_data['movie_ids'] for movie_id in sublist]
+# # Flatten the list of movie IDs
+# all_movie_ids = [movie_id for sublist in users_data['movie_ids'] for movie_id in sublist]
 
-# Get unique movie IDs
-unique_movie_ids = list(set(all_movie_ids))
-movies_data_raw = pd.read_csv('../processed_data/movies.csv', index_col=0)
-movies_data_raw[movies_data_raw['tconst'].isin(unique_movie_ids)].to_csv('../processed_data/training_movies_data.csv')
-movies_data_raw[~(movies_data_raw['tconst'].isin(unique_movie_ids))].to_csv('../processed_data/test_movies_data.csv')
+# # Get unique movie IDs
+# unique_movie_ids = list(set(all_movie_ids))
+# movies_data_raw = pd.read_csv('../processed_data/movies.csv', index_col=0)
+# movies_data_raw[movies_data_raw['tconst'].isin(unique_movie_ids)].to_csv('../processed_data/sample_movies.csv')
+# movies_data_raw[~(movies_data_raw['tconst'].isin(unique_movie_ids))].to_csv('../processed_data/test_movies_data.csv')
 
 # store the test data for movies(items) and users
-val_data.to_csv('../processed_data/validation_users_data.csv')
-test_data.to_csv('../processed_data/test_users_data.csv')
+# val_data.to_csv('../processed_data/sample_movies.csv')
+# test_data.to_csv('../processed_data/test_users_data.csv')
 
 # BERT Embeddings
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
@@ -46,11 +46,11 @@ def get_bert_embeddings(reviews):
 # train_data['bert_embeddings'] = train_data['user_reviews'].apply(get_bert_embeddings)
 
 # Iterating over rows
-train_data_with_embeddings = pd.DataFrame(columns=train_data.columns)
-train_data_with_embeddings.to_csv('../processed_data/training_users_data.csv', header=True)
+train_data_with_embeddings = pd.DataFrame(columns=users_data.columns)
+train_data_with_embeddings.to_csv('../processed_data/users_data_bert_embeddings.csv', header=True)
 batch_data = []
 batch_size = 10
-for index, row in train_data.iterrows():
+for index, row in users_data.iterrows():
     user_reviews = row['user_reviews']
     embedding = get_bert_embeddings(user_reviews)
     row_copy = row.copy()
@@ -59,7 +59,7 @@ for index, row in train_data.iterrows():
     batch_data.append(row_copy)
     if (index + 1) % batch_size == 0:
         batch_df = pd.DataFrame(batch_data)
-        batch_df.to_csv('../processed_data/training_users_data.csv', mode='a', header=False)
+        batch_df.to_csv('../processed_data/users_data_bert_embeddings.csv', mode='a', header=False)
         batch_data = []  # Clear memory
 
     
