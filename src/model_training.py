@@ -102,7 +102,7 @@ directors_encoded = mlb_directors.fit_transform(merged_df['directors_list'])
 writers_encoded = mlb_writers.fit_transform(merged_df['writers_list'])
 # Apply padding
 merged_df['user_reviews_padded'] = merged_df['user_reviews'].apply(pad_tensor)
-merged_df.to_csv('../processed_data/merged_dataset.csv')
+merged_df.to_csv('processed_data/merged_dataset.csv')
 
 # Concatenate all features
 X = np.concatenate([
