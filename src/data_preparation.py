@@ -12,8 +12,8 @@ def safe_literal_eval(value):
     return value  # If already a list, return as is
 
 # Data Loading
-users_data = pd.read_csv('../datasets/user_data.csv')
-movies_data = pd.read_csv('../datasets/movies.csv')
+users_data = pd.read_csv('data/user_data.csv')
+movies_data = pd.read_csv('data/movies.csv')
 
 # Data Cleaning
 movies_data.replace('\\N', np.nan, inplace=True)
@@ -48,7 +48,7 @@ genre1.extend(genre2)
 genre1.extend(genre3)
 genre1 = set(genre1)
 
-movies_data.to_csv('../processed_data/movies.csv', index=False)
-users_data.to_csv('../processed_data/users_data_without_bert.csv', index=False)
+movies_data.to_csv('processed_data/movies.csv', index=False)
+users_data.to_csv('processed_data/users_data_without_bert.csv', index=False)
 
 

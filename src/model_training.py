@@ -12,8 +12,8 @@ from sklearn.metrics import mean_squared_error, precision_score, recall_score, a
 import os
 
 # Load the datasets
-movies_df = pd.read_csv('../processed_data/movies.csv')
-users_df = pd.read_csv('../processed_data/users_data_bert_embeddings.csv')
+movies_df = pd.read_csv('processed_data/movies.csv')
+users_df = pd.read_csv('processed_data/users_data_bert_embeddings.csv')
 
 # movies_df = pd.read_csv('movies_sample_train (2).csv')
 # users_df = pd.read_csv('users_sample_train (1).csv')

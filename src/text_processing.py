@@ -14,8 +14,8 @@ nltk.download('omw-1.4')
 nltk.data.path.append('../nltk_data')
 
 
-users_data = pd.read_csv('../processed_data/users_data_without_bert.csv', index_col=0)
-movies_data = pd.read_csv('../processed_data/movies.csv', index_col=0)
+users_data = pd.read_csv('processed_data/users_data_without_bert.csv', index_col=0)
+movies_data = pd.read_csv('processed_data/movies.csv', index_col=0)
 
 print(users_data.head())
 print(movies_data.head())
@@ -31,4 +31,4 @@ def preprocess_reviews(reviews):
     return lemmatized_reviews
 
 users_data['user_reviews'] = users_data['user_reviews'].apply(preprocess_reviews)
-users_data.to_csv('../processed_data/users_data_without_bert_text_processed.csv', index=False)
+users_data.to_csv('processed_data/users_data_without_bert_text_processed.csv', index=False)

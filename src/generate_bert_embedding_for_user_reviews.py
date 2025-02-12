@@ -5,7 +5,7 @@ from transformers import BertTokenizer, BertModel
 import torch
 import ast
 
-users_data = pd.read_csv('../processed_data/users_data_without_bert.csv.csv', index_col=0)
+users_data = pd.read_csv('processed_data/users_data_without_bert_text_processed.csv', index_col=0)
 # print(users_data.head())
 # train_data, temp_data = train_test_split(users_data, test_size=0.3, random_state=42)
 # val_data, test_data = train_test_split(temp_data, test_size=0.5, random_state=42)
@@ -47,7 +47,7 @@ def get_bert_embeddings(reviews):
 
 # Iterating over rows
 train_data_with_embeddings = pd.DataFrame(columns=users_data.columns)
-train_data_with_embeddings.to_csv('../processed_data/users_data_bert_embeddings.csv', header=True)
+train_data_with_embeddings.to_csv('processed_data/users_data_bert_embeddings.csv', header=True)
 batch_data = []
 batch_size = 10
 for index, row in users_data.iterrows():
@@ -59,7 +59,7 @@ for index, row in users_data.iterrows():
     batch_data.append(row_copy)
     if (index + 1) % batch_size == 0:
         batch_df = pd.DataFrame(batch_data)
-        batch_df.to_csv('../processed_data/users_data_bert_embeddings.csv', mode='a', header=False)
+        batch_df.to_csv('processed_data/users_data_bert_embeddings.csv', mode='a', header=False)
         batch_data = []  # Clear memory
 
     
